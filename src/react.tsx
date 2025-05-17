@@ -116,5 +116,5 @@ export function useMutation<T = any, V = Record<string, any>>(
   return { execute, data, error, loading };
 }
 
-// gql 태그 함수 재내보내기
+export * from './react';
 export { gql }; 
