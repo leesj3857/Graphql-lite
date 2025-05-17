@@ -1,5 +1,5 @@
 {
-  "name": "graphql-lite",
+  "name": "graphql-lite-ts",
   "version": "0.1.0",
   "description": "A lightweight and simple GraphQL client library",
   "main": "dist/index.js",
