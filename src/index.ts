@@ -131,3 +131,5 @@ export function gql(strings: TemplateStringsArray, ...values: any[]): string {
     return result + str + (values[i] || '');
   }, '');
 } 
+
+export * from './react';

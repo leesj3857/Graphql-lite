@@ -116,5 +116,4 @@ export function useMutation<T = any, V = Record<string, any>>(
   return { execute, data, error, loading };
 }
 
-export * from './react';
 export { gql }; 
