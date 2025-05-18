@@ -1,13 +1,13 @@
-# GraphQL Lite
+# GraphQL Mini
 
-GraphQL Lite는 GraphQL 요청을 더 간편하게 만들어주는 경량화된 클라이언트 라이브러리입니다. 외부 의존성 없이 순수하게 GraphQL 요청을 처리할 수 있습니다.
+GraphQL Mini는 GraphQL 요청을 더 간편하게 만들어주는 경량화된 클라이언트 라이브러리입니다. 외부 의존성 없이 순수하게 GraphQL 요청을 처리할 수 있습니다.
 
 ## 설치
 
 ```bash
-npm install graphql-lite
+npm install graphql-mini
 # 또는
-yarn add graphql-lite
+yarn add graphql-mini
 ```
 
 ## React 사용법
@@ -15,7 +15,7 @@ yarn add graphql-lite
 ### Provider 설정
 
 ```typescript
-import { createClient, GraphQLProvider } from 'graphql-lite/react';
+import { createClient, GraphQLProvider } from 'graphql-mini';
 
 const client = createClient({
   url: 'https://api.example.com/graphql',
@@ -36,7 +36,7 @@ function App() {
 ### 컴포넌트에서 사용하기
 
 ```typescript
-import { useQuery, useMutation, gql } from 'graphql-lite/react';
+import { useQuery, useMutation, gql } from 'graphql-mini';
 
 // 쿼리 사용 예시
 function UserProfile({ userId }: { userId: string }) {
@@ -97,63 +97,6 @@ function CreateUser() {
       {/* 폼 내용 */}
     </form>
   );
-}
-```
-
-## 기본 사용법 (React 없이)
-
-```typescript
-import { createClient, gql } from 'graphql-lite';
-
-const client = createClient({
-  url: 'https://api.example.com/graphql',
-  headers: {
-    'Authorization': 'Bearer your-token'
-  }
-});
-
-// 쿼리 실행
-const query = gql`
-  query GetUser($id: ID!) {
-    user(id: $id) {
-      id
-      name
-      email
-    }
-  }
-`;
-
-async function fetchUser() {
-  try {
-    const data = await client.query(query, { id: '123' });
-    console.log(data);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-// 뮤테이션 실행
-const mutation = gql`
-  mutation CreateUser($input: CreateUserInput!) {
-    createUser(input: $input) {
-      id
-      name
-    }
-  }
-`;
-
-async function createUser() {
-  try {
-    const data = await client.mutation(mutation, {
-      input: {
-        name: 'John Doe',
-        email: 'john@example.com'
-      }
-    });
-    console.log(data);
-  } catch (error) {
-    console.error('Error:', error);
-  }
 }
 ```
 

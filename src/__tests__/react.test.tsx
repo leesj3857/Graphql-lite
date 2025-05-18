@@ -1,5 +1,5 @@
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { GraphQLProvider, useQuery, useMutation } from '../react';
 import { createClient } from '../index';
 
@@ -92,11 +92,72 @@ describe('React Hooks', () => {
         { wrapper }
       );
 
+      await waitFor(() => {
+        expect(onCompleted).toHaveBeenCalledWith(mockResponse.data);
+      });
+    });
+
+    it('refetch 함수가 정상 동작해야 함', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
+
+      const { result } = renderHook(
+        () => useQuery(mockQuery, mockVariables),
+        { wrapper }
+      );
+
+      // 초기 로딩 완료 대기
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 0));
       });
 
-      expect(onCompleted).toHaveBeenCalledWith(mockResponse.data);
+      // refetch 호출 (새 응답을 모킹)
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: { user: { id: '123', name: 'Jane Doe' } } })
+      });
+
+      await act(async () => {
+        await result.current.refetch();
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+      expect(result.current.data).toEqual({ user: { id: '123', name: 'Jane Doe' } });
+      expect(result.current.error).toBe(null);
+    });
+
+    it('refetch 중 에러가 발생하면 에러 상태를 설정해야 함', async () => {
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockResponse)
+      });
+
+      const { result } = renderHook(
+        () => useQuery(mockQuery, mockVariables),
+        { wrapper }
+      );
+
+      // 초기 로딩 완료 대기
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
+
+      // refetch 호출 (에러 모킹)
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Refetch error'));
+
+      await act(async () => {
+        await result.current.refetch();
+      });
+
+      // refetch 후 에러 상태가 설정되었는지 확인
+      expect(result.current.loading).toBe(false);
+      expect(result.current.data).toBe(null);
+      expect(result.current.error).toBeInstanceOf(Error);
+      expect(result.current.error?.message).toBe('GraphQL request failed: Refetch error');
     });
   });
 

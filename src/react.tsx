@@ -42,40 +42,38 @@ export function useQuery<T = any, V = Record<string, any>>(
   const [error, setError] = React.useState<Error | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  React.useEffect(() => {
+  const fetchData = React.useCallback(async () => {
     let mounted = true;
-
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const result = await client.query<T, V>(query, variables);
-        if (mounted) {
-          setData(result);
-          setError(null);
-          options?.onCompleted?.(result);
-        }
-      } catch (err) {
-        if (mounted) {
-          const error = err instanceof Error ? err : new Error(String(err));
-          setError(error);
-          setData(null);
-          options?.onError?.(error);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+    try {
+      setLoading(true);
+      const result = await client.query<T, V>(query, variables);
+      if (mounted) {
+        setData(result);
+        setError(null);
+        options?.onCompleted?.(result);
+      }
+    } catch (err) {
+      if (mounted) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        setError(error);
+        setData(null);
+        options?.onError?.(error);
+      }
+    } finally {
+      if (mounted) {
+        setLoading(false);
       }
     }
+    return () => { mounted = false; };
+  }, [client, query, JSON.stringify(variables), options]);
 
+  // useEffect에서 fetchData 호출
+  React.useEffect(() => {
     fetchData();
+  }, [fetchData]);
 
-    return () => {
-      mounted = false;
-    };
-  }, [client, query, JSON.stringify(variables)]);
-
-  return { data, error, loading };
+  // refetch 함수를 반환
+  return { data, error, loading, refetch: fetchData };
 }
 
 // 뮤테이션 훅
